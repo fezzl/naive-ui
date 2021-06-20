@@ -26,6 +26,7 @@ module.exports = {
     __DEV__: process.env.NODE_ENV !== 'production'
   },
   optimizeDeps: {
+    // 依赖预构建
     include: [
       '@css-render/plugin-bem',
       'async-validator',
@@ -48,12 +49,14 @@ module.exports = {
     outDir: 'site',
     rollupOptions: {
       plugins: [
+        // babel 配合 rollup 使用
         babel({
           babelHelpers: 'bundled'
         })
       ]
     }
   },
+  // 自定义 jsx
   esbuild: {
     jsxFactory: 'h',
     jsxFragment: 'Fragment'

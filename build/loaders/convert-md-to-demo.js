@@ -8,6 +8,7 @@ const demoBlock = fs
   .readFileSync(path.resolve(__dirname, 'ComponentDemoTemplate.vue'))
   .toString()
 
+// 把 markdown 生成的 token 转化为对应的 template script style title content
 function getPartsOfDemo (tokens) {
   let template = null
   let script = null
@@ -48,31 +49,35 @@ function getPartsOfDemo (tokens) {
   }
 }
 
+// 把不同部分（template|script|style）组合起来成一个组件
 function mergeParts (parts) {
   const mergedParts = {
     ...parts
   }
-  mergedParts.title = parts.title
-  mergedParts.content = parts.content
+  // 初始化代码片段
   mergedParts.code = ''
   if (parts.template) {
+    // 拼接 template 模板代码
     mergedParts.code += `<template>\n${parts.template
       .split('\n')
       .map((line) => (line.length ? '  ' + line : line))
       .join('\n')}\n</template>`
   }
   if (parts.script) {
+    // 拼接 script 脚本代码
     if (parts.template) mergedParts.code += '\n\n'
     mergedParts.code += `<script>
-${parts.script}
-</script>`
+    ${parts.script}
+    </script>`
   }
   if (parts.style) {
+    // 拼接 style 样式代码
     if (parts.template || parts.script) mergedParts.code += '\n\n'
     mergedParts.code += `<style>
-${parts.style}
-</style>`
+    ${parts.style}
+    </style>`
   }
+  // 转义 utf-8 字符
   mergedParts.code = encodeURIComponent(mergedParts.code)
   return mergedParts
 }
@@ -147,11 +152,17 @@ function getFileName (resourcePath) {
 }
 
 function convertMd2Demo (text, { resourcePath, relativeUrl }) {
+  // 不执行这段代码
   const noRunning = /<!--no-running-->/.test(text)
+  // 把 markdown 语法转化为 token
   const tokens = marked.lexer(text)
+  // 把 token 拆分成不同部分
   const parts = getPartsOfDemo(tokens)
+  // 把不同部分组合成在一起
   const mergedParts = mergeParts(parts)
+  // 获取文件名
   const [fileName] = getFileName(resourcePath)
+  // 生成一个 demo 组件
   const vueComponent = genVueComponent(
     mergedParts,
     fileName,
